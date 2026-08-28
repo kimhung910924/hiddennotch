@@ -1,6 +1,7 @@
 # HiddenNotch
 
 *[한국어](README.ko.md)*
+*[Changelog](CHANGELOG.md)* · *[Releasing](docs/RELEASING.md)*
 
 A tiny macOS app that keeps the MacBook menu bar background black so the notch stops
 standing out.
@@ -13,7 +14,7 @@ You set it once and never touch it again.
 
 ## Download
 
-**[Get HiddenNotch 1.0 (dmg)](https://github.com/kimhung910924/hiddennotch/releases/latest)**
+**[Get HiddenNotch 1.1 (dmg)](https://github.com/kimhung910924/hiddennotch/releases/latest)**
 
 - macOS 13 Ventura or later
 - Notarized by Apple, so it opens without a Gatekeeper warning

@@ -1,6 +1,7 @@
 # HiddenNotch
 
 *[English](README.md)*
+*[변경 이력](CHANGELOG.md)* · *[릴리즈 방법](docs/RELEASING.md)*
 
 MacBook 메뉴바 배경을 검게 유지해 노치를 눈에 띄지 않게 하는 초경량 macOS 앱.
 
@@ -9,7 +10,7 @@ MacBook 메뉴바 배경을 검게 유지해 노치를 눈에 띄지 않게 하�
 
 ## 다운로드
 
-**[HiddenNotch 1.0 내려받기 (dmg)](https://github.com/kimhung910924/hiddennotch/releases/latest)**
+**[HiddenNotch 1.1 내려받기 (dmg)](https://github.com/kimhung910924/hiddennotch/releases/latest)**
 
 - macOS 13 Ventura 이상
 - Apple 공증을 마쳤다. 경고 없이 열린다
