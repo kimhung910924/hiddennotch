@@ -36,7 +36,7 @@ enum StatusMenuBuilder {
         menu.addItem(.separator())
 
         menu.addItem(makeItem(
-            "노치 숨기기",
+            L10n.t("노치 숨기기", "Hide the Notch"),
             item: .toggleEnabled,
             checked: state.isEnabled,
             target: target,
@@ -44,7 +44,7 @@ enum StatusMenuBuilder {
         ))
 
         menu.addItem(makeItem(
-            "외부 모니터에도 적용",
+            L10n.t("외부 모니터에도 적용", "Apply to External Displays"),
             item: .toggleAllScreens,
             checked: state.applyToAllScreens,
             target: target,
@@ -52,7 +52,7 @@ enum StatusMenuBuilder {
         ))
 
         menu.addItem(makeItem(
-            "로그인 시 자동 실행",
+            L10n.t("로그인 시 자동 실행", "Launch at Login"),
             item: .toggleLaunchAtLogin,
             checked: state.launchAtLoginEnabled,
             target: target,
@@ -61,7 +61,7 @@ enum StatusMenuBuilder {
 
         if state.launchAtLoginNeedsApproval {
             menu.addItem(makeItem(
-                "로그인 항목 승인 필요 — 시스템 설정 열기",
+                L10n.t("로그인 항목 승인 필요 — 시스템 설정 열기", "Login Item Needs Approval — Open System Settings"),
                 item: .openLoginItemsSettings,
                 checked: false,
                 target: target,
@@ -70,7 +70,7 @@ enum StatusMenuBuilder {
         }
 
         menu.addItem(makeItem(
-            "다시 적용",
+            L10n.t("다시 적용", "Reapply"),
             item: .reapply,
             checked: false,
             target: target,
@@ -79,7 +79,7 @@ enum StatusMenuBuilder {
 
         menu.addItem(.separator())
         menu.addItem(makeItem(
-            "업데이트 확인…",
+            L10n.t("업데이트 확인…", "Check for Updates…"),
             item: .checkForUpdates,
             checked: false,
             target: target,
@@ -88,7 +88,7 @@ enum StatusMenuBuilder {
 
         menu.addItem(.separator())
         menu.addItem(makeItem(
-            "HiddenNotch 종료",
+            L10n.t("HiddenNotch 종료", "Quit HiddenNotch"),
             item: .quit,
             checked: false,
             target: target,
