@@ -1,7 +1,24 @@
 # HiddenNotch
 
-MacBook 메뉴바 배경을 검게 유지해 노치를 눈에 띄지 않게 하는 메뉴바 전용 macOS 앱.
-외부 모니터 연결·해제, 배경화면 변경, 잠자기 복귀, 재부팅 이후에도 조작 없이 상태가 유지되는 것이 목표다.
+MacBook 메뉴바 배경을 검게 유지해 노치를 눈에 띄지 않게 하는 초경량 macOS 앱.
+
+외부 모니터 연결·해제, 배경화면 변경, 잠자기 복귀, 재부팅 이후에도 조작 없이 상태가 유지된다.
+앱 584KB, 상주 메모리 42MB. Dock 아이콘 없이 메뉴바에만 산다.
+
+## 다운로드
+
+**[HiddenNotch 1.0 내려받기 (dmg)](https://github.com/kimhung910924/hiddennotch/releases/latest)**
+
+- macOS 13 Ventura 이상
+- Apple 공증을 마쳤다. 경고 없이 열린다
+- dmg를 열고 HiddenNotch를 `응용 프로그램`으로 끌어다 놓는다
+- 별도 권한을 요구하지 않는다
+
+## 문의
+
+[rrllab.com](https://rrllab.com) · contact@rrllab.com
+
+---
 
 기획: [HIDDENNOTCH-PLAN.md](HIDDENNOTCH-PLAN.md)
 
@@ -22,6 +39,13 @@ xcodebuild test -scheme HiddenNotch -configuration Debug
 ```
 
 Xcode에서 열어 실행해도 된다. Dock에는 나타나지 않고 메뉴바 오른쪽에 아이콘만 생긴다.
+
+### 배포본 만들기
+
+```bash
+./scripts/release.sh            # Developer ID 서명·공증·dmg
+./scripts/release.sh --publish  # GitHub 릴리즈 업로드까지
+```
 
 ## 동작 방식
 

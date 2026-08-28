@@ -23,7 +23,9 @@ TEAM_ID="D9FZ6BL5FD"
 IDENTITY="Developer ID Application: RRLLAB (${TEAM_ID})"
 SECRETS="${NOTARIZE_ENV:-$HOME/Desktop/app-development/omniai/_secrets/notarize.env}"
 
-DERIVED="build/DerivedData"
+# 출력을 .build 아래(숨김 폴더)에 둔다. 그냥 build/에 두면 스팟라이트가 색인해서
+# 응용 프로그램 검색에 Debug·Release 빌드가 설치본과 나란히 뜬다 (2026-08-28 실측).
+DERIVED=".build/DerivedData"
 APP="${DERIVED}/Build/Products/Release/${APP_NAME}.app"
 DIST="dist"
 
