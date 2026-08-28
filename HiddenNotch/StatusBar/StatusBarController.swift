@@ -70,6 +70,8 @@ final class StatusBarController: NSObject, NSMenuDelegate {
             delegate?.statusBarDidRequestReapply()
         case .openLoginItemsSettings:
             delegate?.statusBarDidRequestLoginItemsSettings()
+        case .checkForUpdates:
+            UpdateController.shared.checkForUpdates()
         case .quit:
             delegate?.statusBarDidRequestQuit()
         }

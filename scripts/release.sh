@@ -23,6 +23,13 @@ TEAM_ID="D9FZ6BL5FD"
 IDENTITY="Developer ID Application: RRLLAB (${TEAM_ID})"
 SECRETS="${NOTARIZE_ENV:-$HOME/Desktop/app-development/omniai/_secrets/notarize.env}"
 
+# Sparkle 자동 업데이트
+SPARKLE_VERSION="2.9.6"
+SPARKLE_TOOLS=".build/sparkle-tools"
+REPO="kimhung910924/hiddennotch"
+FEED_SLUG="hiddennotch"               # rrllab.com/apps/<slug>/appcast.xml
+SITE="${RRLLAB_SITE:-$HOME/Desktop/app-development/omniai/rrl-lab-site}"
+
 # 출력을 .build 아래(숨김 폴더)에 둔다. 그냥 build/에 두면 스팟라이트가 색인해서
 # 응용 프로그램 검색에 Debug·Release 빌드가 설치본과 나란히 뜬다 (2026-08-28 실측).
 DERIVED=".build/DerivedData"
@@ -66,6 +73,24 @@ xcodebuild build -scheme "$SCHEME" -configuration Release \
 
 [ -d "$APP" ] || { echo "앱이 안 나왔다: $APP" >&2; exit 1; }
 
+# Xcode는 SPM이 넣어 준 Sparkle.framework를 ad-hoc 서명 그대로 둔다(2026-08-28 실측).
+# 그 상태로 공증을 넣으면 Updater.app에서
+#   "The binary is not signed with a valid Developer ID certificate"
+# 로 거절당한다. 중첩 코드부터 안쪽 순서로 다시 서명한다 — 바깥을 먼저 서명하면
+# 안쪽을 건드리는 순간 깨진다. --deep은 애플이 권장하지 않는다.
+echo "==> Sparkle 재서명"
+SPARKLE="$APP/Contents/Frameworks/Sparkle.framework"
+for target in \
+    "$SPARKLE/Versions/B/XPCServices/Downloader.xpc" \
+    "$SPARKLE/Versions/B/XPCServices/Installer.xpc" \
+    "$SPARKLE/Versions/B/Updater.app" \
+    "$SPARKLE/Versions/B/Autoupdate" \
+    "$SPARKLE" \
+    "$APP"
+do
+    codesign --force --options runtime --timestamp --sign "$IDENTITY" "$target"
+done
+
 # 버전은 빌드 산출물의 plist가 진실이다(Xcode가 생성한다).
 VERSION="$(/usr/libexec/PlistBuddy -c 'Print :CFBundleShortVersionString' "$APP/Contents/Info.plist")"
 DMG="${DIST}/${APP_NAME}-${VERSION}.dmg"
@@ -97,14 +122,74 @@ echo "==> 판정 (accepted가 아니면 배포하면 안 된다)"
 spctl -a -t open --context context:primary-signature -vv "$DMG"
 spctl -a -vv "$APP"
 
-rm -f "$ZIP"
+# zip은 지우지 않는다. 공증 제출물이면서 동시에 Sparkle이 내려받는 업데이트 파일이다.
 echo "==> 완료: $DMG"
+
+# ── Sparkle appcast ───────────────────────────────────────
+echo "==> Sparkle 서명"
+if [ ! -x "$SPARKLE_TOOLS/bin/sign_update" ]; then
+    echo "  도구 내려받는 중 ($SPARKLE_VERSION)"
+    mkdir -p "$SPARKLE_TOOLS"
+    curl -sL "https://github.com/sparkle-project/Sparkle/releases/download/${SPARKLE_VERSION}/Sparkle-${SPARKLE_VERSION}.tar.xz" \
+        | tar -xJ -C "$SPARKLE_TOOLS"
+fi
+
+# sign_update는 Keychain의 개인키를 쓴다. 백업은 _secrets/sparkle-ed25519-private.key.
+SIGN_OUTPUT="$("$SPARKLE_TOOLS/bin/sign_update" "$ZIP")"
+ED_SIGNATURE="$(echo "$SIGN_OUTPUT" | sed -E 's/.*edSignature="([^"]+)".*/\1/')"
+ZIP_LENGTH="$(echo "$SIGN_OUTPUT" | sed -E 's/.*length="([0-9]+)".*/\1/')"
+[ -n "$ED_SIGNATURE" ] || { echo "서명을 못 만들었다: $SIGN_OUTPUT" >&2; exit 1; }
+
+# 이 프로젝트는 Resources/Info.plist가 없다. Xcode가 만든 산출물의 plist가 진실이다.
+BUILD="$(/usr/libexec/PlistBuddy -c 'Print :CFBundleVersion' "$APP/Contents/Info.plist")"
+MIN_SYSTEM="$(/usr/libexec/PlistBuddy -c 'Print :LSMinimumSystemVersion' "$APP/Contents/Info.plist")"
+FEED_URL="https://rrllab.com/apps/${FEED_SLUG}/appcast.xml"
+NOTES_URL="https://rrllab.com/apps/${FEED_SLUG}/notes/${VERSION}.html"
+ZIP_URL="https://github.com/${REPO}/releases/download/v${VERSION}/$(basename "$ZIP")"
+
+if [ -d "$SITE" ]; then
+    APPCAST="$SITE/public/apps/${FEED_SLUG}/appcast.xml"
+    NOTES="$SITE/public/apps/${FEED_SLUG}/notes/${VERSION}.html"
+    python3 scripts/update-appcast.py \
+        --appcast "$APPCAST" --title "$APP_NAME" --feed "$FEED_URL" \
+        --version "$VERSION" --build "$BUILD" \
+        --url "$ZIP_URL" --length "$ZIP_LENGTH" --signature "$ED_SIGNATURE" \
+        --min-system "$MIN_SYSTEM" --notes-url "$NOTES_URL" \
+        --pub-date "$(date -R)"
+
+    if [ ! -f "$NOTES" ]; then
+        mkdir -p "$(dirname "$NOTES")"
+        cat > "$NOTES" <<HTML
+<!doctype html>
+<meta charset="utf-8">
+<title>${APP_NAME} ${VERSION}</title>
+<h2>${APP_NAME} ${VERSION}</h2>
+<ul>
+  <li>여기에 이번 버전에서 바뀐 것을 적는다.</li>
+</ul>
+HTML
+        echo "  릴리즈 노트 초안: $NOTES  ← 내용을 채울 것"
+    fi
+else
+    echo "  ⚠️  홈페이지 저장소가 없다: $SITE — appcast를 갱신하지 못했다" >&2
+fi
+
+# ── GitHub 릴리즈 ─────────────────────────────────────────
 
 if [ "$PUBLISH" = "1" ]; then
     TAG="v${VERSION}"
     echo "==> GitHub 릴리즈 $TAG"
     gh release view "$TAG" >/dev/null 2>&1 \
-        && gh release upload "$TAG" "$DMG" --clobber \
-        || gh release create "$TAG" "$DMG" --title "$APP_NAME $VERSION" --generate-notes
+        && gh release upload "$TAG" "$DMG" "$ZIP" --clobber \
+        || gh release create "$TAG" "$DMG" "$ZIP" --title "$APP_NAME $VERSION" --generate-notes
     gh release view "$TAG" --json url --jq .url
+
+    # appcast는 zip이 실제로 올라간 뒤에 공개한다. 순서가 반대면 앱이 404를 받는다.
+    if [ -d "$SITE" ]; then
+        echo "==> appcast 배포 (Vercel이 푸시를 받아 배포한다)"
+        git -C "$SITE" add "public/apps/${FEED_SLUG}"
+        git -C "$SITE" commit -q -m "chore(${FEED_SLUG}): appcast ${VERSION}" || echo "  바뀐 것 없음"
+        git -C "$SITE" push -q
+        echo "  $FEED_URL"
+    fi
 fi

@@ -9,6 +9,7 @@ enum StatusMenuBuilder {
         case toggleLaunchAtLogin
         case reapply
         case openLoginItemsSettings
+        case checkForUpdates
         case quit
     }
 
@@ -71,6 +72,15 @@ enum StatusMenuBuilder {
         menu.addItem(makeItem(
             "다시 적용",
             item: .reapply,
+            checked: false,
+            target: target,
+            action: action
+        ))
+
+        menu.addItem(.separator())
+        menu.addItem(makeItem(
+            "업데이트 확인…",
+            item: .checkForUpdates,
             checked: false,
             target: target,
             action: action

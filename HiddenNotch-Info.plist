@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+	<!-- 이 프로젝트는 GENERATE_INFOPLIST_FILE=YES라 Xcode가 Info.plist를 만든다.
+	     이 파일은 그 위에 얹히는 바탕이다. Sparkle 키는 INFOPLIST_KEY_* 빌드 설정으로
+	     넣을 수 없어서(Xcode가 아는 키 목록에 없다) 여기에 직접 적는다.
+
+	     피드는 GitHub이 아니라 자기 도메인에 둔다 — 이 주소는 배포된 앱 안에 영구히
+	     박히고, 이미 깔린 앱이 몇 년 뒤에도 계속 두드린다. -->
+	<key>SUEnableAutomaticChecks</key>
+	<true/>
+	<key>SUFeedURL</key>
+	<string>https://rrllab.com/apps/hiddennotch/appcast.xml</string>
+	<key>SUPublicEDKey</key>
+	<string>ELp8ctuIKHUUeCj02Gtu3vP3f+fOrMgMDPrvuakMgeI=</string>
+</dict>
+</plist>

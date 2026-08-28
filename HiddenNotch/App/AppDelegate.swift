@@ -29,6 +29,7 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
 
         syncLaunchAtLoginWithRequest()
         applyAtStartup(attemptsLeft: 3)
+        UpdateController.shared.start()
     }
 
     func applicationDidBecomeActive(_ notification: Notification) {
